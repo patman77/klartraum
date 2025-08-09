@@ -2,6 +2,8 @@
 #define KLARTRAUM_UNIFORMBUFFEROBJECT_HPP
 
 #include <vector>
+#include <cstring> // for std::memcpy
+
 
 #include <vulkan/vulkan.h>
 

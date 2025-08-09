@@ -1,3 +1,4 @@
+#include <cstring>
 #include <vulkan/vulkan.h>
 
 #include "klartraum/vulkan_context.hpp"
