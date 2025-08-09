@@ -81,7 +81,13 @@ int main() {
 
 ```
 # Build
-Currently, Klartraum can only be build on Windows with Visual Studio 2022 on the x64 architecture.
+Klartraum can be built on Windows with Visual Studio 2022 (x64) and on Linux.
+
+On Linux, install the xkbcommon and Xinerama development packages (required for GLFW's Wayland and X11 backends respectively):
+
+```bash
+sudo apt install libxkbcommon-dev libxinerama-dev
+```
 
 ```bash
 git clone https://github.com/fortmeier/klartraum.git
@@ -98,8 +104,5 @@ cd ..
 .\build\examples\Debug\gaussian_splatting_example.exe
 
 # on Linux
-# t.b.d.
+./build/examples/gaussian_splatting_example
 ```
-
-
-

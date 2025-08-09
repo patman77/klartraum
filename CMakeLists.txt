@@ -3,12 +3,17 @@ cmake_minimum_required(VERSION 3.10)
 cmake_policy(SET CMP0135 NEW)
 
 project(klartraum)
-set(CMAKE_GENERATOR_PLATFORM x64)
+# The generator platform is only relevant on Windows
+if(WIN32)
+    set(CMAKE_GENERATOR_PLATFORM x64)
+endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
-# macOS and Apple Silicon (M4) support
+
+# Platform specific configuration
 if(APPLE)
+    # macOS and Apple Silicon (M4) support
     message(STATUS "Building for macOS")
     
     # Detect Apple Silicon (ARM64)
@@ -19,13 +24,37 @@ if(APPLE)
 
     # Set minimum macOS deployment target
     set(CMAKE_OSX_DEPLOYMENT_TARGET "12.0")
-    
+
     # Enable modern Objective-C runtime
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fobjc-arc")
-    
+
     # Optimization flags for Apple Silicon
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
         set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -mcpu=apple-m1")
+    endif()
+elseif(UNIX AND NOT APPLE)
+    message(STATUS "Building for Linux")
+
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(XKBCOMMON QUIET xkbcommon>=0.5.0)
+    pkg_check_modules(XINERAMA QUIET xinerama)
+
+    if(XKBCOMMON_FOUND)
+        set(GLFW_BUILD_WAYLAND ON CACHE BOOL "" FORCE)
+    else()
+        message(WARNING "xkbcommon not found, disabling Wayland support in GLFW")
+        set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
+    endif()
+
+    if(XINERAMA_FOUND)
+        set(GLFW_BUILD_X11 ON CACHE BOOL "" FORCE)
+    else()
+        message(WARNING "Xinerama not found, disabling X11 support in GLFW")
+        set(GLFW_BUILD_X11 OFF CACHE BOOL "" FORCE)
+    endif()
+
+    if(NOT GLFW_BUILD_WAYLAND AND NOT GLFW_BUILD_X11)
+        message(FATAL_ERROR "No window system libraries found (requires xkbcommon for Wayland or Xinerama for X11)")
     endif()
 endif()
 
@@ -94,7 +123,7 @@ set(KLARTRAUM_LIB_SRC
 # Create Klartraum library
 add_library(klartraum_lib STATIC ${KLARTRAUM_LIB_SRC})
 
-set(LIBRARIES 
+set(LIBRARIES
     ${Vulkan_LIBRARIES}
     glfw
     zlibstatic
@@ -103,6 +132,9 @@ set(LIBRARIES
 
 if(APPLE)
   list(APPEND LIBRARIES ${MACOS_FRAMEWORKS})
+elseif(UNIX AND NOT APPLE)
+  find_package(Threads REQUIRED)
+  list(APPEND LIBRARIES ${CMAKE_DL_LIBS} Threads::Threads)
 endif()
 
 target_link_libraries(klartraum_lib ${LIBRARIES})
