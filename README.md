@@ -83,10 +83,10 @@ int main() {
 # Build
 Klartraum can be built on Windows with Visual Studio 2022 (x64) and on Linux.
 
-On Linux, install the xkbcommon development package (required for GLFW when building with Wayland):
+On Linux, install the xkbcommon and Xinerama development packages (required for GLFW's Wayland and X11 backends respectively):
 
 ```bash
-sudo apt install libxkbcommon-dev
+sudo apt install libxkbcommon-dev libxinerama-dev
 ```
 
 ```bash

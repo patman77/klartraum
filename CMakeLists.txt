@@ -37,10 +37,24 @@ elseif(UNIX AND NOT APPLE)
 
     find_package(PkgConfig REQUIRED)
     pkg_check_modules(XKBCOMMON QUIET xkbcommon>=0.5.0)
-    if(NOT XKBCOMMON_FOUND)
+    pkg_check_modules(XINERAMA QUIET xinerama)
+
+    if(XKBCOMMON_FOUND)
+        set(GLFW_BUILD_WAYLAND ON CACHE BOOL "" FORCE)
+    else()
         message(WARNING "xkbcommon not found, disabling Wayland support in GLFW")
         set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
+    endif()
+
+    if(XINERAMA_FOUND)
         set(GLFW_BUILD_X11 ON CACHE BOOL "" FORCE)
+    else()
+        message(WARNING "Xinerama not found, disabling X11 support in GLFW")
+        set(GLFW_BUILD_X11 OFF CACHE BOOL "" FORCE)
+    endif()
+
+    if(NOT GLFW_BUILD_WAYLAND AND NOT GLFW_BUILD_X11)
+        message(FATAL_ERROR "No window system libraries found (requires xkbcommon for Wayland or Xinerama for X11)")
     endif()
 endif()
 
