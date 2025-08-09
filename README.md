@@ -106,6 +106,3 @@ cd ..
 # on Linux
 ./build/examples/gaussian_splatting_example
 ```
-
-
-
